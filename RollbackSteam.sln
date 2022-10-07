@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollbackSteam", "RollbackSteam\RollbackSteam.csproj", "{A3B5F32C-30E3-4FF4-AB96-64BBE9B89C8B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A3B5F32C-30E3-4FF4-AB96-64BBE9B89C8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3B5F32C-30E3-4FF4-AB96-64BBE9B89C8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3B5F32C-30E3-4FF4-AB96-64BBE9B89C8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3B5F32C-30E3-4FF4-AB96-64BBE9B89C8B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
