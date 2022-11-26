@@ -45,8 +45,12 @@
     <ItemGroup>
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Services\ConsoleService.cs" />
+        <Compile Include="Services\ResourcesService.cs" />
     </ItemGroup>
     <ItemGroup>
+      <EmbeddedResource Include="Resources\bin\chromehtml.dll" />
+      <EmbeddedResource Include="Resources\bin\vgui2_s.dll" />
       <EmbeddedResource Include="Resources\steam.exe" />
     </ItemGroup>
     <ItemGroup>

@@ -6,45 +6,49 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Win32;
+using RollbackSteam.Services;
 
 namespace RollbackSteam
 {
-    internal class Program
+    internal static class Program
     {
         private const string SteamCommand = "BootStrapperInhibitAll=enable";
-        private static List<string> _resourcesList = null!;
+        private const string SteamTriggerVersionText = "7.56.33.36";
 
         public static void Main(string[] args)
         {
-            var triggerVersion = new Version("7.56.33.36");
-            _resourcesList = new List<string>()
+            var triggerVersion = new Version(SteamTriggerVersionText);
+            
+            try
             {
-                "steam.exe", "steamclient.dll", "SteamUI.dll"
-            };
+                var steamPath = GetSteamPath();
+                var steamFile = Path.Combine(steamPath, "steam.exe");
+                if (!File.Exists(steamFile))
+                    throw new FileNotFoundException($"{steamFile} not found");
 
-            var steamPath = GetSteamPath();
-            var steamFile = Path.Combine(steamPath, "steam.exe");
-            if (!File.Exists(steamFile))
-                throw new FileNotFoundException("steam.exe not found");
+                AppendSteamConfig(steamPath);
 
-            AppendSteamConfig(steamPath);
-            Console.WriteLine("steam.cfg appended");
+                var steamVersion = GetFileVersion(steamFile);
+                ConsoleService.WriteInfo($"Steam Version: {steamVersion}");
 
-            var steamVersion = GetFileVersion(steamFile);
-            Console.WriteLine($"Steam Version: {steamVersion}");
+                if (steamVersion >= triggerVersion)
+                {
+                    ConsoleService.WriteInfo("Steam need roll back to old version");
 
-            if (steamVersion >= triggerVersion)
-            {
-                Console.WriteLine("Steam need roll back to old version");
-
-                CloseAllSteamProcesses();
-                CopyOldSteamToPath(steamPath);
+                    CloseAllSteamProcesses();
+                    CopyOldSteamToPath(steamPath);
+                }
+                else
+                {
+                    ConsoleService.WriteInfo("Steam not need to be rolled back");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Steam not need to be rolled back");
+                ConsoleService.WriteError(ex.Message);
             }
 
+            Console.ResetColor();
             Console.WriteLine("\nPRESS ANY KEY TO EXIT");
             Console.ReadKey();
         }
@@ -79,56 +83,69 @@ namespace RollbackSteam
 
             using var sw = new StreamWriter(fs);
             sw.WriteLineAsync(SteamCommand);
+            ConsoleService.WriteSuccess("steam.cfg appended");
         }
 
-        private static string RenameFile(string fileName)
+        private static void BackupFile(string fileName)
         {
             var unixTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             var newFileName = $"{fileName}.{unixTime}";
+            
             File.Move(fileName, newFileName);
-            return newFileName;
+            ConsoleService.WriteSuccess($"File renamed: {fileName} -> {newFileName}");
         }
 
         private static void CopyOldSteamToPath(string steamPath)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            _resourcesList.ForEach(resourceName =>
-            {
-                var file = Path.Combine(steamPath, resourceName);
-                var newFile = RenameFile(file);
-                Console.WriteLine($"File renamed: {file} -> {newFile}");
+            var resources = ResourcesService.GetResourcesList();
 
+            resources.ForEach(resourceName =>
+            {
+                Console.WriteLine();
                 
-                Console.WriteLine($"Copying {resourceName}...");
-                using var resource = assembly.GetManifestResourceStream($"RollbackSteam.Resources.{resourceName}");
-                using var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.Write);
-                resource?.CopyTo(fs);
+                var tempFileName = resourceName
+                    .Replace("RollbackSteam.Resources.", "")
+                    .Replace("bin.", "bin\\");
+                var fileName = Path.Combine(steamPath, tempFileName);
+                BackupFile(fileName);
+
+                ConsoleService.WriteInfo($"Extracting resource {tempFileName}...");
+                ResourcesService.ExtractResource(resourceName, fileName);
+                ConsoleService.WriteSuccess($"Extracted to {fileName}");
             });
         }
 
         private static void CloseAllSteamProcesses()
         {
-            Console.WriteLine("Closing all steam processes...");
-            
-            var processes = Process.GetProcesses().Where(p =>
-            {
-                var processName = p.ProcessName.ToLower();
-                return processName == "steam" || processName.StartsWith("steam_");
-            }).ToList();
+            ConsoleService.WriteInfo("Closing all steam processes...");
+
+            // var processes = Process.GetProcesses().Where(p =>
+            // {
+            //     var processName = p.ProcessName.ToLower();
+            //     return processName == "steam" || processName.StartsWith("steam_");
+            // }).ToList();
+            var processes = Process
+                .GetProcesses()
+                .Where(p => p.ProcessName.ToLower().StartsWith("steam"))
+                .ToList();
             processes.ForEach(process =>
             {
                 try
                 {
                     process.Kill();
-                    Console.WriteLine($"{process.Id} killed");
+                    ConsoleService.WriteSuccess($"{process.Id} killed");
                 }
                 catch
                 {
+                    ConsoleService.WriteError($"{process.Id} not killed");
                 }
             });
+
+            if (processes.Count <= 0)
+                return;
             
-            if (processes.Count > 0)
-                Thread.Sleep(2000);
+            ConsoleService.WriteInfo("Waiting...");
+            Thread.Sleep(2500);
         }
     }
 }
