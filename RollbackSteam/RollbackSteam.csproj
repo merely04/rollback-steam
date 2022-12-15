@@ -49,14 +49,24 @@
         <Compile Include="Services\ResourcesService.cs" />
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Include="Resources\bin\chromehtml.dll" />
-      <EmbeddedResource Include="Resources\bin\vgui2_s.dll" />
-      <EmbeddedResource Include="Resources\steam.exe" />
+        <EmbeddedResource Include="Resources\steamclient.dll" />
+        <EmbeddedResource Include="Resources\SteamUI.dll" />
+        
+        <EmbeddedResource Include="Resources\bin\chromehtml.dll" />
+        <EmbeddedResource Include="Resources\bin\vgui2_s.dll" />
+        <EmbeddedResource Include="Resources\steam.exe" />
+        <EmbeddedResource Include="Resources\bin\audio.dll" />
+        <EmbeddedResource Include="Resources\bin\filesystem_stdio.dll" />
+        <EmbeddedResource Include="Resources\bin\friendsui.dll" />
+        <EmbeddedResource Include="Resources\bin\gameoverlayui.dll" />
+        <EmbeddedResource Include="Resources\bin\mss32.dll" />
+        <EmbeddedResource Include="Resources\bin\nattypeprobe.dll" />
+        <EmbeddedResource Include="Resources\bin\serverbrowser.dll" />
+        <EmbeddedResource Include="Resources\bin\steamservice.dll" />
+        <EmbeddedResource Include="Resources\bin\xinput1_3.dll" />
+        <EmbeddedResource Include="Resources\bin\xpad.dll" />
     </ItemGroup>
-    <ItemGroup>
-      <EmbeddedResource Include="Resources\steamclient.dll" />
-      <EmbeddedResource Include="Resources\SteamUI.dll" />
-    </ItemGroup>
+    
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
